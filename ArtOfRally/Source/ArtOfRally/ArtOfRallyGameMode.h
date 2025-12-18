@@ -6,6 +6,11 @@
 #include "GameFramework/GameModeBase.h"
 #include "ArtOfRallyGameMode.generated.h"
 
+
+class AAORPlayerState;
+class AAOREnemy;
+
+
 UCLASS(abstract)
 class AArtOfRallyGameMode : public AGameModeBase
 {
