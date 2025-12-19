@@ -7,11 +7,10 @@
 #include "Sound/SoundCue.h"
 #include "Projectile.h"
 #include "KombatComponent.h"
+#include "AOREnemy.h"
 
-// Sets default values
 AWeaponBase::AWeaponBase()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -60,7 +59,6 @@ void AWeaponBase::BeginPlay()
 void AWeaponBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 bool AWeaponBase::Fire(UWorld* WorldPtr, FHitResult& HitResult)
@@ -94,6 +92,88 @@ void AWeaponBase::LaunchProjectile()
 {
 	if (WeaponType != EWeaponType::EWT_Projetile) return;
 
+	if (FindTarget())
+	{
+		if (GetSuggestedProjectileVelocity(CurrentLaunchVelocity))
+		{
+			UpdatingSwitch(true);
+			FRotator LaunchRotation = CurrentLaunchVelocity.Rotation();
+
+			LaunchRotation.Normalize();
+			RotationYawOffset = LaunchRotation.Yaw;
+			RotationFix(RotationYawOffset);
+
+			GetWorld()->GetTimerManager().SetTimer(Handle_LaunchDelayProjectile, this, &AWeaponBase::FinalLaunchProjectile, LaunchDelay, false);
+		}
+		else
+		{
+			UpdatingSwitch(false);
+		}
+	}
+	else
+	{
+		UpdatingSwitch(false);
+	}
+}
+
+bool AWeaponBase::GetSuggestedProjectileVelocity(FVector& OutVelocity)
+{
+	if (!CurrentProjectileTarget) return false;
+
+	FVector StartLocation = GetActorLocation();
+	FVector TargetLocation = CurrentProjectileTarget->GetActorLocation();
+
+	bool bHasSolution = UGameplayStatics::SuggestProjectileVelocity(
+		this,
+		OutVelocity,          // OUT: suggested velocity
+		StartLocation,           // Start point
+		TargetLocation,          // End point
+		LaunchForce,                // Launch speed (units/sec)
+		false,                   // High arc (true) or low arc (false)
+		0.0f,                    // Collision radius
+		0.0f,                    // Override gravity (0 = use world gravity)
+		ESuggestProjVelocityTraceOption::DoNotTrace // tracing option
+	);
+
+
+	return bHasSolution;
+}
+
+bool AWeaponBase::FindTarget()
+{
+	TArray<AActor*> OutActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAOREnemy::StaticClass(), OutActors);
+
+	float Distance = FLT_MAX;
+	AAOREnemy* Target = nullptr;
+	bool bEResult = false;
+
+	for (AActor* Item : OutActors)
+	{
+		if (Item != nullptr)
+		{
+			AAOREnemy* Enemy = Cast<AAOREnemy>(Item);
+			if (Enemy != nullptr)
+			{
+				if (!Enemy->GetIsDead())
+				{
+					double CurrentDistance = (Enemy->GetActorLocation() - GetActorLocation()).Size();
+					if (CurrentDistance < Distance)
+					{
+						Distance = CurrentDistance;
+						Target = Enemy;
+					}
+				}
+			}
+		}
+	}
+
+	CurrentProjectileTarget = Target;
+	return CurrentProjectileTarget != nullptr;
+}
+
+void AWeaponBase::FinalLaunchProjectile()
+{
 	FVector StartLocation = ShootComp->GetComponentLocation();
 	FRotator Rot = ShootComp->GetComponentRotation();
 	FVector Direction = Rot.Vector();
@@ -104,7 +184,8 @@ void AWeaponBase::LaunchProjectile()
 		ProjectileBullet->SetOwner(this->GetOwner());
 		if (KombatComp != nullptr)
 		{
-			ProjectileBullet->SetTarget(KombatComp->CurrentProjectileTarget);
+			ProjectileBullet->SetTarget(CurrentProjectileTarget);
+			ProjectileBullet->SetProjectileVelocity(CurrentLaunchVelocity);
 		}
 	}
 }

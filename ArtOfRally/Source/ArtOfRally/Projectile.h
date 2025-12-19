@@ -20,17 +20,21 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USphereComponent* CollisionComp = nullptr;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	class UProjectileMovementComponent* ProjMoveComp = nullptr;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void Explode();
-	void FollowToTarget(float Dt);
-	void GoWithTheFlow(float Dt);
 
 	UFUNCTION()
 	void OnProjectileCollide(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION()
+	void OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 public:	
 	// Called every frame
@@ -40,6 +44,8 @@ public:
 	void SetTarget(AAOREnemy* InTarget);
 
 	void SetDamage(float InDamage);
+
+	void SetProjectileVelocity(const FVector InVelocity);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DNA")
 	float FollowSpeed = 2.f;
@@ -59,6 +65,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DNA")
 	float FollowStartDelay = 0.5f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DNA")
+	float DamageRadius = 500.f;
+
 private:
 	float DamageAmount = 10.f;
 	AActor* TargetActor = nullptr;
@@ -68,8 +77,8 @@ private:
 
 	bool bDestroyed = false;
 
-	FTimerHandle Handle_FollowStart;
+private:
 
-	void FollowStart();
+	FVector LaunchVelocity;
 
 };

@@ -5,6 +5,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "AOREnemy.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 AProjectile::AProjectile()
 {
@@ -12,6 +13,8 @@ AProjectile::AProjectile()
 
 	CollisionComp = CreateDefaultSubobject<USphereComponent>(FName("CollisionComponent"));
 	RootComponent = CollisionComp;
+
+	ProjMoveComp = CreateDefaultSubobject<UProjectileMovementComponent>(FName("ProjectileMovementComponent"));
 }
 
 void AProjectile::BeginPlay()
@@ -20,10 +23,8 @@ void AProjectile::BeginPlay()
 	
 	InitialLocation = GetActorLocation();
 
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnProjectileCollide);
-
-	if (!GetWorld()->GetTimerManager().IsTimerActive(Handle_FollowStart))
-		GetWorld()->GetTimerManager().SetTimer(Handle_FollowStart, this, &AProjectile::FollowStart, FollowStartDelay, false);
+	//CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnProjectileCollide);
+	CollisionComp->OnComponentHit.AddDynamic(this, &AProjectile::OnProjectileHit);
 }
 
 void AProjectile::Explode()
@@ -33,44 +34,16 @@ void AProjectile::Explode()
 		bDestroyed = true;
 		
 		Destroy();
-		//SetLifeSpan(1.f);
-
-		
+		//SetLifeSpan(1.f);	
 	}
 }
 
-void AProjectile::FollowToTarget(float Dt)
+void AProjectile::SetProjectileVelocity(const FVector InVelocity)
 {
-	if (TargetActor != nullptr)
+	if (ProjMoveComp)
 	{
-		//FVector LocalToWorld = UKismetMathLibrary::TransformLocation(TargetActor->GetActorTransform(), TargetOffset);
-		FVector LocalToWorld = TargetActor->GetActorLocation();
-
-		FVector NewLocation = FMath::VInterpTo(GetActorLocation(), LocalToWorld, Dt, FollowSpeed);
-		FRotator NewRotation = FMath::RInterpTo(GetActorRotation(), UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), LocalToWorld), Dt, RotationSpeed);
-
-		FHitResult HitResult;
-		SetActorLocation(NewLocation, true, &HitResult);
-		SetActorRotation(NewRotation);
-		//if (HitResult.bBlockingHit || (GetActorLocation() - LocalToWorld).Size() <= MinTargetReachedDistanceToExplode)
-		//{
-		//	Explode();
-		//}
+		ProjMoveComp->Velocity = InVelocity;
 	}
-}
-
-void AProjectile::GoWithTheFlow(float Dt)
-{
-	FVector Location = GetActorLocation();
-	Location += GetActorRotation().Vector() * LinearSpeed * Dt;
-
-	FHitResult HitResult;
-	SetActorLocation(Location, true, &HitResult);
-
-	//if (HitResult.bBlockingHit || (InitialLocation - GetActorLocation()).Size() >= MaxLinearRange)
-	//{
-	//	Explode();
-	//}
 }
 
 void AProjectile::OnProjectileCollide(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -86,12 +59,38 @@ void AProjectile::OnProjectileCollide(UPrimitiveComponent* OverlappedComponent, 
 	}
 }
 
+void AProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	AProjectile* SelfCheck = Cast<AProjectile>(OtherActor);
+	if (SelfCheck) return;
+
+	if (OtherActor != GetOwner())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Applying Damage"));
+		//UGameplayStatics::ApplyDamage(OtherActor, DamageAmount, GetWorld()->GetFirstPlayerController(), GetWorld()->GetFirstPlayerController()->GetPawn(), NULL);
+
+		UGameplayStatics::ApplyRadialDamage(
+			this,
+			DamageAmount,                // base damage
+			Hit.ImpactPoint,             // center of explosion
+			DamageRadius,                // radius
+			UDamageType::StaticClass(),  // damage type
+			TArray<AActor*>(),           // actors to ignore
+			this,                        // damage causer
+			GetInstigatorController(),   // instigator
+			true                         // do full damage
+		);
+
+		// Optional: debug sphere
+		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, DamageRadius, 8, FColor::Red, false, 10.0f);
+
+		Explode();
+	}
+}
+
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (bUTurnToTarget) FollowToTarget(DeltaTime);
-	else GoWithTheFlow(DeltaTime);
 }
 
 void AProjectile::SetTarget(AAOREnemy* InTarget)
@@ -107,9 +106,3 @@ void AProjectile::SetDamage(float InDamage)
 {
 	DamageAmount = InDamage;
 }
-
-void AProjectile::FollowStart()
-{
-	bUTurnToTarget = true;
-}
-

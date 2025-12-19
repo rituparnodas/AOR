@@ -8,6 +8,7 @@
 
 class AProjectile;
 class UKombatComponent;
+class AAOREnemy;
 
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
@@ -145,6 +146,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
 	float ProjectileDamage = 50.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup|ProjectileV2")
+	float LaunchForce = 2000.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup|ProjectileV2")
+	float LaunchDelay = 0.5f;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -159,7 +166,28 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LaunchProjectile();
 
+	bool FindTarget();
+
+	bool GetSuggestedProjectileVelocity(FVector& OutVelocity);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void RotationFix(float Yaw);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void UpdatingSwitch(bool bShouldUpdate);
+
+public:
+	UPROPERTY(BlueprintReadWrite)
+	AAOREnemy* CurrentProjectileTarget = nullptr;
+
+	UPROPERTY(BlueprintReadWrite)
+	float RotationYawOffset = 0.f;
 
 private:
 	FTimerHandle Handle_FireMode_AUTO;
+	FTimerHandle Handle_LaunchDelayProjectile;
+
+	void FinalLaunchProjectile();
+
+	FVector CurrentLaunchVelocity = FVector::ZeroVector;
 };

@@ -34,11 +34,11 @@ public:
 
 public:
 
-	UPROPERTY(BlueprintReadWrite)
-	AAOREnemy* CurrentProjectileTarget = nullptr;
-
-	UFUNCTION(BlueprintCallable)
-	void FindTarget();
+	//UPROPERTY(BlueprintReadWrite)
+	//AAOREnemy* CurrentProjectileTarget = nullptr;
+	//
+	//UFUNCTION(BlueprintCallable)
+	//bool FindTarget();
 
 protected:
 	// Called when the game starts

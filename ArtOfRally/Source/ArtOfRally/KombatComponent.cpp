@@ -79,36 +79,7 @@ void UKombatComponent::SpawnBackLauncher()
 	}
 }
 
-void UKombatComponent::FindTarget()
-{
-	TArray<AActor*> OutActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAOREnemy::StaticClass(), OutActors);
 
-	float Distance = FLT_MAX;
-	AAOREnemy* Target = nullptr;
-
-	for (AActor* Item : OutActors)
-	{
-		if (Item != nullptr)
-		{
-			AAOREnemy* Enemy = Cast<AAOREnemy>(Item);
-			if (Enemy != nullptr)
-			{
-				if (!Enemy->GetIsDead())
-				{
-					double CurrentDistance = (Enemy->GetActorLocation() - GetOwner()->GetActorLocation()).Size();
-					if (CurrentDistance < Distance)
-					{
-						Distance = CurrentDistance;
-						Target = Enemy;
-					}
-				}	
-			}	
-		}
-	}
-
-	CurrentProjectileTarget = Target;
-}
 
 void UKombatComponent::BeginPlay()
 {
@@ -143,3 +114,36 @@ void UKombatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 
 
 }
+
+//bool UKombatComponent::FindTarget()
+//{
+//	TArray<AActor*> OutActors;
+//	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAOREnemy::StaticClass(), OutActors);
+//
+//	float Distance = FLT_MAX;
+//	AAOREnemy* Target = nullptr;
+//	bool bEResult = false;
+//
+//	for (AActor* Item : OutActors)
+//	{
+//		if (Item != nullptr)
+//		{
+//			AAOREnemy* Enemy = Cast<AAOREnemy>(Item);
+//			if (Enemy != nullptr)
+//			{
+//				if (!Enemy->GetIsDead())
+//				{
+//					double CurrentDistance = (Enemy->GetActorLocation() - GetOwner()->GetActorLocation()).Size();
+//					if (CurrentDistance < Distance)
+//					{
+//						Distance = CurrentDistance;
+//						Target = Enemy;
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	CurrentProjectileTarget = Target;
+//	return CurrentProjectileTarget != nullptr;
+//}
