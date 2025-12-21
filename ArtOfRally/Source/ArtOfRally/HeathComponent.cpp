@@ -5,12 +5,14 @@ UHeathComponent::UHeathComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
-	Health = DefaultHealth;
+	
 }
 
 void UHeathComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	Health = DefaultHealth;
 
 	AActor* MyOwner = GetOwner();
 	if (MyOwner != nullptr)
@@ -42,5 +44,10 @@ void UHeathComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, co
 void UHeathComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+float UHeathComponent::GetHealthPercent() const
+{
+	return Health / DefaultHealth;
 }
 

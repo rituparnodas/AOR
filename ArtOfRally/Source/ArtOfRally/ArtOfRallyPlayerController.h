@@ -63,7 +63,7 @@ protected:
 	TSubclassOf<UArtOfRallyUI> VehicleUIClass;
 
 	/** Pointer to the UI widget */
-	UPROPERTY()
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UArtOfRallyUI> VehicleUI;
 		
 protected:

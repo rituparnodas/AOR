@@ -54,6 +54,9 @@ void AProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* Oth
 	AProjectile* SelfCheck = Cast<AProjectile>(OtherActor);
 	if (SelfCheck) return;
 
+	TArray<AActor*> IgnoreActors;
+	IgnoreActors.Add(GetWorld()->GetFirstPlayerController()->GetPawn());
+
 	if (OtherActor != GetOwner())
 	{
 		CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -67,7 +70,7 @@ void AProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* Oth
 			Hit.ImpactPoint,             // center of explosion
 			DamageRadius,                // radius
 			UDamageType::StaticClass(),  // damage type
-			TArray<AActor*>(),           // actors to ignore
+			IgnoreActors,           // actors to ignore
 			this,                        // damage causer
 			GetInstigatorController(),   // instigator
 			true                         // do full damage
