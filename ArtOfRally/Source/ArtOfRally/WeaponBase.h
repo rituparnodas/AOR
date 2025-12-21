@@ -138,6 +138,9 @@ public:
 	float WeaponRange = 1000.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
+	float MinimumAngleToShoot = 30.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
 	class USoundCue* BulletSound = nullptr;
 
 	UPROPERTY(EditAnywhere, Category = "Setup")
@@ -168,6 +171,8 @@ public:
 
 	bool FindTarget();
 
+	bool FindRifleTarget();
+
 	bool GetSuggestedProjectileVelocity(FVector& OutVelocity);
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -184,7 +189,7 @@ public:
 
 public:
 	UPROPERTY(BlueprintReadWrite)
-	AAOREnemy* CurrentProjectileTarget = nullptr;
+	AAOREnemy* CurrentTarget = nullptr;
 
 	UPROPERTY(BlueprintReadWrite)
 	float RotationYawOffset = 0.f;

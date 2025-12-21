@@ -74,7 +74,7 @@ void AProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* Oth
 		);
 
 		// Optional: debug sphere
-		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, DamageRadius, 8, FColor::Red, false, 10.0f);
+		//DrawDebugSphere(GetWorld(), Hit.ImpactPoint, DamageRadius, 8, FColor::Red, false, 10.0f);
 
 		ApplyExplosionForce();
 

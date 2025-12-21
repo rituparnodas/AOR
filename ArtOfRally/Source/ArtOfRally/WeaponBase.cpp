@@ -3,6 +3,7 @@
 
 #include "WeaponBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Components/SceneComponent.h"
 #include "Sound/SoundCue.h"
 #include "Projectile.h"
@@ -27,6 +28,8 @@ void AWeaponBase::StopShot()
 
 void AWeaponBase::ShootLogic()
 {
+	if (!FindRifleTarget()) return;
+
 	FHitResult HitResult;
 	
 	if (Fire(GetWorld(),HitResult))
@@ -34,7 +37,12 @@ void AWeaponBase::ShootLogic()
 		ImpactEvent(HitResult.Location);
 		ApplyDamage(HitResult);
 	}
-	UGameplayStatics::PlaySoundAtLocation(GetWorld(), BulletSound, HitResult.Location);
+
+	if (BulletSound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), BulletSound, HitResult.Location);
+	}
+	
 }
 
 void AWeaponBase::ApplyDamage(FHitResult HitResult)
@@ -134,10 +142,10 @@ void AWeaponBase::LaunchProjectile()
 
 bool AWeaponBase::GetSuggestedProjectileVelocity(FVector& OutVelocity)
 {
-	if (!CurrentProjectileTarget) return false;
+	if (!CurrentTarget) return false;
 
 	FVector StartLocation = GetActorLocation();
-	FVector TargetLocation = CurrentProjectileTarget->GetActorLocation();
+	FVector TargetLocation = CurrentTarget->GetActorLocation();
 
 	bool bHasSolution = UGameplayStatics::SuggestProjectileVelocity(
 		this,
@@ -184,8 +192,49 @@ bool AWeaponBase::FindTarget()
 		}
 	}
 
-	CurrentProjectileTarget = Target;
-	return CurrentProjectileTarget != nullptr;
+	CurrentTarget = Target;
+	return CurrentTarget != nullptr;
+}
+
+bool AWeaponBase::FindRifleTarget()
+{
+	TArray<AActor*> OutActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAOREnemy::StaticClass(), OutActors);
+
+	bool bResult = false;
+
+	for (AActor* Item : OutActors)
+	{
+		if (Item != nullptr)
+		{
+			AAOREnemy* Enemy = Cast<AAOREnemy>(Item);
+			if (Enemy != nullptr)
+			{
+				if (!Enemy->GetIsDead())
+				{
+
+					FVector ToEnemy = (Enemy->GetActorLocation() - ShootComp->GetComponentLocation()).GetSafeNormal();
+					FVector Forward = ShootComp->GetForwardVector();
+
+
+					float DotProduct = FVector::DotProduct(Forward, ToEnemy);
+					float AngleRadians = FMath::Acos(DotProduct);
+					float Angle = UKismetMathLibrary::RadiansToDegrees(AngleRadians);
+
+					//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("Angle : %f"), Angle));
+
+					if (FMath::Abs(Angle) < MinimumAngleToShoot)
+					{
+						//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, FString::Printf(TEXT("{}Angle : %f"), FMath::Abs(Angle)));
+						return true;
+					}
+					
+				}
+			}
+		}
+	}
+
+	return bResult;
 }
 
 void AWeaponBase::FinalLaunchProjectile()
@@ -200,7 +249,7 @@ void AWeaponBase::FinalLaunchProjectile()
 		ProjectileBullet->SetOwner(this->GetOwner());
 		if (KombatComp != nullptr)
 		{
-			ProjectileBullet->SetTarget(CurrentProjectileTarget);
+			ProjectileBullet->SetTarget(CurrentTarget);
 			ProjectileBullet->SetProjectileVelocity(CurrentLaunchVelocity);
 		}
 		FireEvent();
