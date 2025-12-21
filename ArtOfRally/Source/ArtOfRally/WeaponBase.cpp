@@ -31,6 +31,7 @@ void AWeaponBase::ShootLogic()
 	
 	if (Fire(GetWorld(),HitResult))
 	{
+		ImpactEvent(HitResult.Location);
 		ApplyDamage(HitResult);
 	}
 	UGameplayStatics::PlaySoundAtLocation(GetWorld(), BulletSound, HitResult.Location);
@@ -75,17 +76,32 @@ bool AWeaponBase::Fire(UWorld* WorldPtr, FHitResult& HitResult)
 	FVector EndLocation = StartLocation + ShootComp->GetComponentRotation().Vector() * WeaponRange;
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
-	QueryParams.bTraceComplex = true;
+	QueryParams.AddIgnoredActor(GetOwner());
+	QueryParams.bTraceComplex = false;
 	QueryParams.bReturnPhysicalMaterial = true;;
-	bool bSuccess = WorldPtr->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, QueryParams);
+	bool bSuccess = WorldPtr->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECollisionChannel::ECC_GameTraceChannel1, QueryParams);
+
+	//FColor TraceColor = bSuccess ? FColor::Green : FColor::Red;
+	//DrawDebugLine(
+	//	WorldPtr,
+	//	StartLocation,
+	//	bSuccess ? HitResult.Location : EndLocation,
+	//	TraceColor,
+	//	false,   // persistent lines?
+	//	2.0f,    // lifetime
+	//	0,       // depth priority
+	//	2.0f     // thickness
+	//);
+	
 	if (bSuccess)
 	{
-		if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Hit On : %s"), *HitResult.GetActor()->GetName()));
+		//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Hit On : %s"), *HitResult.GetActor()->GetName()));
 	}
 	else HitResult.Location = EndLocation;
+
+	FireEvent();
+
 	return bSuccess;
-	
-	return true;
 }
 
 void AWeaponBase::LaunchProjectile()
@@ -187,5 +203,6 @@ void AWeaponBase::FinalLaunchProjectile()
 			ProjectileBullet->SetTarget(CurrentProjectileTarget);
 			ProjectileBullet->SetProjectileVelocity(CurrentLaunchVelocity);
 		}
+		FireEvent();
 	}
 }

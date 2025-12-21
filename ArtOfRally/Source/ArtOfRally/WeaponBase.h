@@ -176,6 +176,12 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void UpdatingSwitch(bool bShouldUpdate);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void FireEvent();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ImpactEvent(FVector ImpactLocation);
+
 public:
 	UPROPERTY(BlueprintReadWrite)
 	AAOREnemy* CurrentProjectileTarget = nullptr;

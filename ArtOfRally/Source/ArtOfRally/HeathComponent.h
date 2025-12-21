@@ -6,6 +6,9 @@
 #include "Components/ActorComponent.h"
 #include "HeathComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnHealthChangedSignature, float, Health, float, Damage, AActor*, DamageCauser);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeadSignature, AActor*, DamageCauser);
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class ARTOFRALLY_API UHeathComponent : public UActorComponent
@@ -15,6 +18,12 @@ class ARTOFRALLY_API UHeathComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UHeathComponent();
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnHealthChangedSignature OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnDeadSignature OnDead;
 
 protected:
 	// Called when the game starts

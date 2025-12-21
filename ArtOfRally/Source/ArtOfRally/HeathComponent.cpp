@@ -21,7 +21,7 @@ void UHeathComponent::BeginPlay()
 
 void UHeathComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Getting Damage"));
+	//UE_LOG(LogTemp, Warning, TEXT("Getting Damage"));
 
 	if (Damage <= 0.f || bIsDead) return;
 	if (DamageCauser == DamagedActor) return;
@@ -29,7 +29,14 @@ void UHeathComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, co
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	bIsDead = Health <= 0.f;
 
-	UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health);
+	OnHealthChanged.Broadcast(Health, Damage, DamageCauser);
+
+	if (bIsDead)
+	{
+		OnDead.Broadcast(DamageCauser);
+	}
+
+	//UE_LOG(LogTemp, Warning, TEXT("Health: %f"), Health);
 }
 
 void UHeathComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

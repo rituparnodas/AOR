@@ -6,9 +6,8 @@
 #include "ArtOfRallyPawn.h"
 #include "ArtOfRallyOffroadCar.generated.h"
 
-/**
- *  Offroad car wheeled vehicle implementation
- */
+class UBoxComponent;
+
 UCLASS(abstract)
 class AArtOfRallyOffroadCar : public AArtOfRallyPawn
 {
@@ -33,6 +32,9 @@ class AArtOfRallyOffroadCar : public AArtOfRallyPawn
 	/** RR Tire static mesh */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category ="Components", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* TireRearRight;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	UBoxComponent* MeleeCollisionBox = nullptr;
 
 public:
 

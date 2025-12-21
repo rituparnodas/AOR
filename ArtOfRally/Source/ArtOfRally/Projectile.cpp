@@ -6,6 +6,7 @@
 #include "AOREnemy.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 AProjectile::AProjectile()
 {
@@ -25,17 +26,6 @@ void AProjectile::BeginPlay()
 
 	//CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnProjectileCollide);
 	CollisionComp->OnComponentHit.AddDynamic(this, &AProjectile::OnProjectileHit);
-}
-
-void AProjectile::Explode()
-{
-	if (!bDestroyed)
-	{
-		bDestroyed = true;
-		
-		Destroy();
-		//SetLifeSpan(1.f);	
-	}
 }
 
 void AProjectile::SetProjectileVelocity(const FVector InVelocity)
@@ -66,7 +56,9 @@ void AProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* Oth
 
 	if (OtherActor != GetOwner())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Applying Damage"));
+		CollisionComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+		
 		//UGameplayStatics::ApplyDamage(OtherActor, DamageAmount, GetWorld()->GetFirstPlayerController(), GetWorld()->GetFirstPlayerController()->GetPawn(), NULL);
 
 		UGameplayStatics::ApplyRadialDamage(
@@ -84,8 +76,49 @@ void AProjectile::OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* Oth
 		// Optional: debug sphere
 		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, DamageRadius, 8, FColor::Red, false, 10.0f);
 
+		ApplyExplosionForce();
+
 		Explode();
 	}
+}
+
+void AProjectile::ApplyExplosionForce()
+{
+	TArray<AActor*> OverlappingActors;
+
+	UKismetSystemLibrary::SphereOverlapActors(
+		GetWorld(),
+		GetActorLocation(),          // center
+		DamageRadius,                     // radius
+		{ EObjectTypeQuery::ObjectTypeQuery3, EObjectTypeQuery::ObjectTypeQuery4 },
+		// ObjectTypeQuery3 = Pawn, ObjectTypeQuery4 = PhysicsBody (depends on project settings)
+		nullptr,                    // class filter
+		{this},          // actors to ignore
+		OverlappingActors           // OUT: actors found
+	);
+
+	for (AActor* Actor : OverlappingActors)
+	{
+		if (AAOREnemy* HitEnemy = Cast<AAOREnemy>(Actor))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Applying Character Force: %s"), *(HitEnemy->GetName()));
+			FVector Dir = (HitEnemy->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+			Dir = UKismetMathLibrary::Quat_RotateVector(FQuat::MakeFromRotator(FRotator(45.f, 0.f,0.f)), Dir);
+			HitEnemy->LaunchCharacter(Dir * LaunchForcePawn, false, false);
+		}
+		else if (UPrimitiveComponent* PrimComp = Actor->FindComponentByClass<UPrimitiveComponent>())
+		{
+			if (PrimComp->IsSimulatingPhysics())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Applying Force: %s"), *(Actor->GetName()));
+
+				FVector Direction = (PrimComp->GetComponentLocation() - GetActorLocation()).GetSafeNormal();
+				Direction = UKismetMathLibrary::Quat_RotateVector(FQuat::MakeFromRotator(FRotator(45.f, 0.f, 0.f)), Direction);
+				PrimComp->AddImpulse(Direction * ExplosionForce, NAME_None ,false);
+			}
+		}
+	}
+
 }
 
 void AProjectile::Tick(float DeltaTime)

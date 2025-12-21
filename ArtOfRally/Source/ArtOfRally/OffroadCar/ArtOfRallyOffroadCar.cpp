@@ -9,6 +9,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/BoxComponent.h"
 
 AArtOfRallyOffroadCar::AArtOfRallyOffroadCar()
 {
@@ -85,4 +86,7 @@ AArtOfRallyOffroadCar::AArtOfRallyOffroadCar()
 	// NOTE: Check the Blueprint asset for the Steering Curve
 	GetChaosVehicleMovement()->SteeringSetup.SteeringType = ESteeringType::AngleRatio;
 	GetChaosVehicleMovement()->SteeringSetup.AngleRatio = 0.7f;
+
+	MeleeCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("MeleeCollisionBox"));
+	MeleeCollisionBox->SetupAttachment(GetMesh());
 }

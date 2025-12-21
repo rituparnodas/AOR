@@ -28,13 +28,16 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	void Explode();
-
 	UFUNCTION()
 	void OnProjectileCollide(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
 	UFUNCTION()
 	void OnProjectileHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void Explode();
+
+	void ApplyExplosionForce();
 
 public:	
 	// Called every frame
@@ -67,6 +70,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DNA")
 	float DamageRadius = 500.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DNA")
+	float ExplosionForce = 1500.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "DNA")
+	float LaunchForcePawn = 1000.f;
 
 private:
 	float DamageAmount = 10.f;
