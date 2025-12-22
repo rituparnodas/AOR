@@ -129,6 +129,9 @@ public:
 	EWeaponType WeaponType = EWeaponType::EWT_MachineGun;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
+	bool bIsAIWeapon = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")
 	float DamagePerShot = 10.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setup")

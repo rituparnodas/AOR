@@ -36,4 +36,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool GetIsDead();
+
+
+	UFUNCTION(BlueprintImplementableEvent,BlueprintCallable)
+	void StartShoot();
+
+	UFUNCTION(BlueprintImplementableEvent,BlueprintCallable)
+	void StopShoot();
 };

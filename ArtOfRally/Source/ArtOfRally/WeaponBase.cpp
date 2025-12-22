@@ -28,8 +28,11 @@ void AWeaponBase::StopShot()
 
 void AWeaponBase::ShootLogic()
 {
-	if (!FindRifleTarget()) return;
-
+	if (!bIsAIWeapon)
+	{
+		if (!FindRifleTarget()) return;
+	}
+	
 	FHitResult HitResult;
 	
 	if (Fire(GetWorld(),HitResult))
@@ -49,9 +52,15 @@ void AWeaponBase::ApplyDamage(FHitResult HitResult)
 {
 	if (HitResult.bBlockingHit)
 	{
-		//UGameplayStatics::ApplyDamage(HitResult.GetActor(), DamagePerShot, GetOwner()->GetInstigatorController(), GetOwner(), NULL);
-		UGameplayStatics::ApplyDamage(HitResult.GetActor(), DamagePerShot, GetWorld()->GetFirstPlayerController(), GetWorld()->GetFirstPlayerController()->GetPawn(), NULL);
-		//else UE_LOG(LogTemp, Error, TEXT("Owner Is nullptr For %s, Try To Call AActor::SetOwner() Before Calling Fire()"), *GetName());
+		if (GetOwner())
+		{
+			AController* InstigatorController = GetOwner()->GetInstigatorController();
+			if (InstigatorController)
+			{
+				UGameplayStatics::ApplyDamage(HitResult.GetActor(), DamagePerShot, InstigatorController, InstigatorController->GetPawn(), NULL);
+			}	
+			//else UE_LOG(LogTemp, Error, TEXT("Owner Is nullptr For %s, Try To Call AActor::SetOwner() Before Calling Fire()"), *GetName());
+		}
 	}
 }
 
