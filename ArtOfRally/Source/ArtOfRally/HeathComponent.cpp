@@ -28,6 +28,12 @@ void UHeathComponent::HandleTakeAnyDamage(AActor* DamagedActor, float Damage, co
 	if (Damage <= 0.f || bIsDead) return;
 	if (DamageCauser == DamagedActor) return;
 
+	UHeathComponent* OtherHealthComp = Cast<UHeathComponent>(DamageCauser->FindComponentByClass(UHeathComponent::StaticClass()));
+	if (OtherHealthComp)
+	{
+		if (OtherHealthComp->TeamNum == TeamNum) return;
+	}
+
 	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 	bIsDead = Health <= 0.f;
 

@@ -42,6 +42,9 @@ public:
 
 public:
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthComponent")
+	int32 TeamNum = 255;
+
 	UPROPERTY(BlueprintReadOnly, Category = "HealthComponent")
 	float Health;
 
@@ -53,4 +56,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "HealthComponent")
 	bool bIsDead = false;
+
+
 };
