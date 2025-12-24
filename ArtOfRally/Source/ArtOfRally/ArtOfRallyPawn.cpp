@@ -96,6 +96,8 @@ void AArtOfRallyPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
+	FuelCapacity = MaxFuelCapacity;
+
 	// set up the flipped check timer
 	GetWorld()->GetTimerManager().SetTimer(FlipCheckTimer, this, &AArtOfRallyPawn::FlippedCheck, FlipCheckTime, true);
 }
@@ -121,6 +123,14 @@ void AArtOfRallyPawn::Tick(float Delta)
 	CameraYaw = FMath::FInterpTo(CameraYaw, 0.0f, Delta, 1.0f);
 
 	BackSpringArm->SetRelativeRotation(FRotator(0.0f, CameraYaw, 0.0f));
+
+	if (bBreaking)
+	{
+		if (GetFuelPercentage() > 0.f)
+		{
+			ConsumeFuel(0.5f);
+		}
+	}
 }
 
 void AArtOfRallyPawn::Steering(const FInputActionValue& Value)
@@ -191,20 +201,45 @@ void AArtOfRallyPawn::DoSteering(float SteeringValue)
 
 void AArtOfRallyPawn::DoThrottle(float ThrottleValue)
 {
-	// add the input
-	ChaosVehicleMovement->SetThrottleInput(ThrottleValue);
+	if (GetFuelPercentage() > 0.f)
+	{
+		ConsumeFuel(1.f);
+		//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Throttle : %f"), ThrottleValue));
 
-	// reset the brake input
-	ChaosVehicleMovement->SetBrakeInput(0.0f);
+		// add the input
+		ChaosVehicleMovement->SetThrottleInput(ThrottleValue);
+
+		// reset the brake input
+		ChaosVehicleMovement->SetBrakeInput(0.0f);
+	}
+	else
+	{
+		ChaosVehicleMovement->SetThrottleInput(0.f);
+
+		// reset the brake input
+		ChaosVehicleMovement->SetBrakeInput(0.0f);
+	}
 }
 
 void AArtOfRallyPawn::DoBrake(float BrakeValue)
 {
-	// add the input
-	ChaosVehicleMovement->SetBrakeInput(BrakeValue);
+	bBreaking = true;
 
-	// reset the throttle input
-	ChaosVehicleMovement->SetThrottleInput(0.0f);
+	if (GetFuelPercentage() > 0.f)
+	{
+		// add the input
+		ChaosVehicleMovement->SetBrakeInput(BrakeValue);
+
+		// reset the throttle input
+		ChaosVehicleMovement->SetThrottleInput(0.0f);
+	}
+	else
+	{
+		ChaosVehicleMovement->SetBrakeInput(0.f);
+
+		// reset the throttle input
+		ChaosVehicleMovement->SetThrottleInput(0.0f);
+	}
 }
 
 void AArtOfRallyPawn::DoBrakeStart()
@@ -215,6 +250,8 @@ void AArtOfRallyPawn::DoBrakeStart()
 
 void AArtOfRallyPawn::DoBrakeStop()
 {
+	bBreaking = false;
+
 	// call the Blueprint hook for the brake lights
 	BrakeLights(false);
 
@@ -293,6 +330,27 @@ void AArtOfRallyPawn::FlippedCheck()
 
 		// we're upright. reset the flipped check flag
 		bPreviousFlipCheck = false;
+	}
+}
+
+float AArtOfRallyPawn::GetFuelPercentage() const
+{
+	return FuelCapacity / MaxFuelCapacity;
+}
+
+float AArtOfRallyPawn::Refuel(float Amount)
+{
+	FuelCapacity += Amount;
+	FuelCapacity = FMath::Clamp(FuelCapacity, 0.0f, MaxFuelCapacity);
+	return FuelCapacity;
+}
+
+void AArtOfRallyPawn::ConsumeFuel(float Throttle)
+{
+	//if (Throttle != 0.f)
+	{
+		FuelCapacity -= FuelConsumptionRate * GetWorld()->DeltaTimeSeconds * Throttle;
+		FuelCapacity = FMath::Clamp(FuelCapacity, 0.0f, MaxFuelCapacity);
 	}
 }
 

@@ -1,5 +1,6 @@
 #include "AOREnemy.h"
 #include "HeathComponent.h"
+#include "ArtOfRallyGameMode.h"
 
 AAOREnemy::AAOREnemy()
 {
@@ -11,6 +12,10 @@ AAOREnemy::AAOREnemy()
 void AAOREnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	GameModeRef = GetWorld() != nullptr ? Cast<AArtOfRallyGameMode>(GetWorld()->GetAuthGameMode()) : nullptr;
+
+	HealthComp->OnDead.AddDynamic(this, &AAOREnemy::OnDead);
 }
 
 void AAOREnemy::Tick(float DeltaTime)
@@ -31,4 +36,12 @@ float AAOREnemy::GetHealth()
 bool AAOREnemy::GetIsDead()
 {
 	return HealthComp != nullptr ? HealthComp->bIsDead : false;
+}
+
+void AAOREnemy::OnDead(AActor* Causer)
+{
+	if (GameModeRef)
+	{
+		GameModeRef->RemoveEnemy(this);
+	}
 }

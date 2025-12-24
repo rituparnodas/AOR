@@ -203,4 +203,25 @@ public:
 	FORCEINLINE UCameraComponent* GetBackCamera() const { return BackCamera; }
 	/** Returns the cast Chaos Vehicle Movement subobject */
 	FORCEINLINE const TObjectPtr<UChaosWheeledVehicleMovementComponent>& GetChaosVehicleMovement() const { return ChaosVehicleMovement; }
+
+	public:
+
+	bool bBreaking = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fuel")
+	float FuelCapacity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fuel")
+	float MaxFuelCapacity = 100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fuel")
+	float FuelConsumptionRate = 0.1f; // Fuel consumed per second at full throttle
+
+	UFUNCTION(BlueprintPure)
+	float GetFuelPercentage() const;
+
+	UFUNCTION(BlueprintCallable)
+	float Refuel(float Amount);
+
+	void ConsumeFuel(float Throttle = 1.f);
 };

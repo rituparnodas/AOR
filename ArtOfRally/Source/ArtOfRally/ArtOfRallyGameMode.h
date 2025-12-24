@@ -18,6 +18,21 @@ class AArtOfRallyGameMode : public AGameModeBase
 
 public:
 	AArtOfRallyGameMode();
+
+	void RemoveEnemy(AAOREnemy* EnemyToRemove);
+
+	UFUNCTION(BlueprintCallable)
+	void AddEnemy(AAOREnemy* EnemyToAdd);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnEnemyRemoved(AAOREnemy* NewEnemy);
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<AAOREnemy*> Enemies;
+
+	UPROPERTY(BlueprintReadWrite)
+	TArray<AAOREnemy*> Enemies;
+
 };
 
 

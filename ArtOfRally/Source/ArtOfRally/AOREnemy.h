@@ -7,6 +7,7 @@
 #include "AOREnemy.generated.h"
 
 class UHeathComponent;
+class AArtOfRallyGameMode;
 
 UCLASS()
 class ARTOFRALLY_API AAOREnemy : public ACharacter
@@ -43,4 +44,11 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent,BlueprintCallable)
 	void StopShoot();
+
+	UFUNCTION()
+	void OnDead(AActor* Causer);
+
+public:
+
+	AArtOfRallyGameMode* GameModeRef = nullptr;
 };
