@@ -57,3 +57,9 @@ float UHeathComponent::GetHealthPercent() const
 	return Health / DefaultHealth;
 }
 
+void UHeathComponent::Heal(float HealAmount)
+{
+	if (HealAmount <= 0.f || Health <= 0.f) return;
+	Health = FMath::Clamp(Health + HealAmount, 0.f, MaxHealth);
+	OnHealthChanged.Broadcast(Health, -HealAmount, nullptr);
+}

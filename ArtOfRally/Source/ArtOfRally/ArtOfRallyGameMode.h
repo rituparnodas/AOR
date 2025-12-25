@@ -10,6 +10,7 @@
 class AAORPlayerState;
 class AAOREnemy;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnUpgrade, FName, Option);
 
 UCLASS(abstract)
 class AArtOfRallyGameMode : public AGameModeBase
@@ -30,8 +31,8 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TArray<AAOREnemy*> Enemies;
 
-	UPROPERTY(BlueprintReadWrite)
-	TArray<AAOREnemy*> Enemies;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Events")
+	FOnUpgrade OnUpgrade;
 
 };
 

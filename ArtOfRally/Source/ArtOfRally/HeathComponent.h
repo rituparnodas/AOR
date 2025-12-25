@@ -40,6 +40,9 @@ public:
 	UFUNCTION(BlueprintPure)
 	float GetHealthPercent() const;
 
+	UFUNCTION(BlueprintCallable)
+	void Heal(float HealAmount);
+
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HealthComponent")

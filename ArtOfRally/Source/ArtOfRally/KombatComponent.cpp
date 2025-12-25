@@ -62,20 +62,26 @@ void UKombatComponent::SpawnBackLauncher()
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	BackLeftLauncher = GetWorld()->SpawnActor<AWeaponBase>(LauncherClass, BackLeftLauncherSpawn->GetComponentTransform(), SpawnParams);
-	if (BackLeftLauncher)
+	if (!BackLeftLauncher)
 	{
-		BackLeftLauncher->AttachToComponent(BackLeftLauncherSpawn, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-		BackLeftLauncher->SetOwner(GetOwner());
-		BackLeftLauncher->KombatComp = this;
+		BackLeftLauncher = GetWorld()->SpawnActor<AWeaponBase>(LauncherClass, BackLeftLauncherSpawn->GetComponentTransform(), SpawnParams);
+		if (BackLeftLauncher)
+		{
+			BackLeftLauncher->AttachToComponent(BackLeftLauncherSpawn, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			BackLeftLauncher->SetOwner(GetOwner());
+			BackLeftLauncher->KombatComp = this;
+		}
 	}
 
-	BackRightLauncher = GetWorld()->SpawnActor<AWeaponBase>(LauncherClass, BackRightLauncherSpawn->GetComponentTransform(), SpawnParams);
-	if (BackRightLauncher)
+	if (!BackRightLauncher)
 	{
-		BackRightLauncher->AttachToComponent(BackRightLauncherSpawn, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-		BackRightLauncher->SetOwner(GetOwner());
-		BackRightLauncher->KombatComp = this;
+		BackRightLauncher = GetWorld()->SpawnActor<AWeaponBase>(LauncherClass, BackRightLauncherSpawn->GetComponentTransform(), SpawnParams);
+		if (BackRightLauncher)
+		{
+			BackRightLauncher->AttachToComponent(BackRightLauncherSpawn, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			BackRightLauncher->SetOwner(GetOwner());
+			BackRightLauncher->KombatComp = this;
+		}
 	}
 }
 
