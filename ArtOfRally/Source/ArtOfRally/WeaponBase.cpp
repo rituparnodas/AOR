@@ -71,6 +71,9 @@ void AWeaponBase::BeginPlay()
 	
 	UActorComponent* AC_Shoot = FindComponentByTag(USceneComponent::StaticClass(), FName("Shoot"));
 	if (AC_Shoot) ShootComp = Cast<USceneComponent>(AC_Shoot);
+
+	DefaultDamagePerShot = DamagePerShot;
+	DefaultProjectileDamage = ProjectileDamage;
 }
 
 // Called every frame
@@ -170,6 +173,18 @@ bool AWeaponBase::GetSuggestedProjectileVelocity(FVector& OutVelocity)
 
 
 	return bHasSolution;
+}
+
+void AWeaponBase::IncreaseDamage(float IncreaseRate)
+{
+	DamagePerShot *= IncreaseRate;
+	ProjectileDamage *= IncreaseRate;
+}
+
+void AWeaponBase::ResetDamage()
+{
+	 DamagePerShot = DefaultDamagePerShot;
+	 ProjectileDamage = DefaultProjectileDamage;
 }
 
 bool AWeaponBase::FindTarget()

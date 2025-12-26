@@ -224,4 +224,7 @@ public:
 	float Refuel(float Amount);
 
 	void ConsumeFuel(float Throttle = 1.f);
+
+	UFUNCTION(BlueprintPure)
+	bool GetIsDrifting(float AngleThreshold, float& Angle);
 };

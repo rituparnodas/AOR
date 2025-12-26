@@ -354,4 +354,21 @@ void AArtOfRallyPawn::ConsumeFuel(float Throttle)
 	}
 }
 
+bool AArtOfRallyPawn::GetIsDrifting(float AngleThreshold, float& Angle)
+{
+	if (ChaosVehicleMovement != nullptr)
+	{
+		FVector VelocityDirection = (GetVelocity()).GetSafeNormal();
+		FVector ForwardDirection = GetActorForwardVector();
+		float Dot = FMath::Acos(FVector::DotProduct(ForwardDirection, VelocityDirection));
+		float AngleDegrees = FMath::RadiansToDegrees(Dot);
+		Angle = AngleDegrees;
+		//if (GEngine) GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, FString::Printf(TEXT("Angle : %f"), Angle));
+
+		return (AngleDegrees > AngleThreshold) && (AngleDegrees < (180.f - AngleThreshold));
+	}
+
+	return false;
+}
+
 #undef LOCTEXT_NAMESPACE

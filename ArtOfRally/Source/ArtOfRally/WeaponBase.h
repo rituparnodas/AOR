@@ -190,6 +190,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ImpactEvent(FVector ImpactLocation);
 
+	void IncreaseDamage(float IncreaseRate = 1.2f);
+	void ResetDamage();
+
 public:
 	UPROPERTY(BlueprintReadWrite)
 	AAOREnemy* CurrentTarget = nullptr;
@@ -204,4 +207,8 @@ private:
 	void FinalLaunchProjectile();
 
 	FVector CurrentLaunchVelocity = FVector::ZeroVector;
+
+	public:
+		float DefaultDamagePerShot;
+		float DefaultProjectileDamage;
 };

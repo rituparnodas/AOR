@@ -34,6 +34,12 @@ public:
 
 public:
 
+	UFUNCTION(BlueprintCallable)
+	void IncreaseAllWeaponDamage(float IncreaseRate = 1.2f);
+
+	UFUNCTION(BlueprintCallable)
+	void ResetAllWeaponDamage();
+
 	//UPROPERTY(BlueprintReadWrite)
 	//AAOREnemy* CurrentProjectileTarget = nullptr;
 	//

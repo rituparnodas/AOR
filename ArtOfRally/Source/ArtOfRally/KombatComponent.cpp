@@ -85,7 +85,25 @@ void UKombatComponent::SpawnBackLauncher()
 	}
 }
 
+void UKombatComponent::IncreaseAllWeaponDamage(float IncreaseRate)
+{
+	if (MiniGunLeft) MiniGunLeft->IncreaseDamage(IncreaseRate);
+	if (MiniGunRight) MiniGunRight->IncreaseDamage(IncreaseRate);
+	if (FrontLeftLauncher) FrontLeftLauncher->IncreaseDamage(IncreaseRate);
+	if (FrontRightLauncher) FrontRightLauncher->IncreaseDamage(IncreaseRate);
+	if (BackLeftLauncher)BackLeftLauncher->IncreaseDamage(IncreaseRate);
+	if (BackRightLauncher) BackRightLauncher->IncreaseDamage(IncreaseRate);
+}
 
+void UKombatComponent::ResetAllWeaponDamage()
+{
+	if (MiniGunLeft) MiniGunLeft->ResetDamage();
+	if (MiniGunRight) MiniGunRight->ResetDamage();
+	if (FrontLeftLauncher) FrontLeftLauncher->ResetDamage();
+	if (FrontRightLauncher) FrontRightLauncher->ResetDamage();
+	if (BackLeftLauncher) BackLeftLauncher->ResetDamage();
+	if (BackRightLauncher) BackRightLauncher->ResetDamage();
+}
 
 void UKombatComponent::BeginPlay()
 {
